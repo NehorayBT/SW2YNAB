@@ -222,7 +222,6 @@ input:focus {
   align-items: flex-start;
   text-align: left;
   border-radius: 12px;
-  padding: 10px;
   margin: 15px;
   min-width: 30rem;
   overflow: hidden;
@@ -255,17 +254,25 @@ input:focus {
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-  margin-bottom: 10px;
   width: 100%;
-  border-bottom: 1px solid var(--color-secondary);
 }
 
 .sw-expense-date {
   background-color: var(--color-secondary);
-  width: 200%;
-  position: relative;
-  left: -10px;
-  top: -10px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 5px;
+}
+
+.sw-expense-date button {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--color-primary);
+}
+
+.sw-expense-date button:hover {
+  color: var(--color-text-alert);
 }
 
 .sw-expense-date p {
@@ -276,11 +283,20 @@ input:focus {
 }
 
 .sw-expense-desc {
+  width: 100%;
+  padding: 10px;
+}
+
+.sw-expense-desc-inside {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px;
   width: 100%;
+  border-bottom: 1px solid var(--color-secondary);
+}
+
+.sw-expense-desc h2 {
+  margin-bottom: 17px;
 }
 
 .cost-negative {
@@ -293,8 +309,18 @@ input:focus {
   width: 100%;
   justify-content: space-between;
   align-items: space-between;
+  padding: 10px;
 }
 
 .sw-expense ul {
   width: 100%;
+  margin-top: -10px;
+}
+
+.sw-expense li {
+  margin-bottom: -10px;
+}
+
+.sw-expense li:last-child {
+  margin-bottom: 0;
 }

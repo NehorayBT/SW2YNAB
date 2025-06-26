@@ -1,20 +1,29 @@
 import SplitwiseRepayment from "./SplitwiseRepayment";
 
-export default function SplitwiseExpense({ expense }) {
+export default function SplitwiseExpense({ expense, localData, setLocalData }) {
+  const handleClick = () => {
+    const filteredData = localData.filter((item) => item.id !== expense.id);
+    setLocalData(filteredData);
+  };
   return (
     <li>
       <div className="sw-expense">
         <div className="sw-expense-header">
           <div className="sw-expense-date">
             <p>{expense.created_at}</p>
+            <button onClick={handleClick}>x</button>
           </div>
           <div className="sw-expense-desc">
-            <h2>{expense.description}</h2>
-            <h2
-              className={expense.cost >= 0 ? "cost-positive" : "cost-negative"}
-            >
-              {expense.cost}
-            </h2>
+            <div className="sw-expense-desc-inside">
+              <h2>{expense.description}</h2>
+              <h2
+                className={
+                  expense.cost >= 0 ? "cost-positive" : "cost-negative"
+                }
+              >
+                {expense.cost}
+              </h2>
+            </div>
           </div>
         </div>
         <ul>

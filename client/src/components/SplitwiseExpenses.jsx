@@ -1,11 +1,14 @@
-import { useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { GlobalContext } from "../App";
 import SplitwiseExpense from "./SplitwiseExpense";
+import cloneDeep from "lodash/cloneDeep";
 
 export default function SplitwiseExpenses() {
   const { swType, swId, swStartDate, swEndDate, swLimit, setStep } =
     useContext(GlobalContext);
+
+  const [localData, setLocalData] = useState([]);
 
   const fetchExpenses = async () => {
     // --- adding relevant parameters ---
@@ -23,7 +26,10 @@ export default function SplitwiseExpenses() {
       `http://localhost:5000/api/splitwise/expenses?${params.toString()}`
     );
     if (!res.ok) throw new Error("Failed to fetch expenses");
-    return res.json();
+
+    const json = await res.json();
+    setLocalData(cloneDeep(json.expenses));
+    return json;
   };
 
   const { data, isLoading, error } = useQuery({
@@ -50,8 +56,13 @@ export default function SplitwiseExpenses() {
       <h1 className="sw-expenses-header">Splitwise expenses</h1>
       <button onClick={() => setStep("splitwise_range")}>Go back</button>
       <ul>
-        {data.expenses.map((expense) => (
-          <SplitwiseExpense key={expense.id} expense={expense} />
+        {localData.map((expense) => (
+          <SplitwiseExpense
+            key={expense.id}
+            expense={expense}
+            localData={localData}
+            setLocalData={setLocalData}
+          />
         ))}
       </ul>
     </div>
