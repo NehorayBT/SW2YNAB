@@ -31,17 +31,29 @@ export default function SplitwiseExpenses() {
     queryFn: fetchExpenses,
   });
 
-  if (isLoading) return <p>Loading expenses...</p>;
-  if (error) return <p>Error: {error.message}</p>;
+  if (isLoading)
+    return (
+      <div className="main-col-container">
+        <h1>Loading expenses</h1>
+      </div>
+    );
+  if (error)
+    return (
+      <div className="main-col-container">
+        <h1>Error</h1>
+        <h2>{error.message}</h2>
+      </div>
+    );
 
   return (
-    <>
+    <div className="main-col-container sw-expenses">
+      <h1 className="sw-expenses-header">Splitwise expenses</h1>
       <button onClick={() => setStep("splitwise_range")}>Go back</button>
       <ul>
         {data.expenses.map((expense) => (
           <SplitwiseExpense key={expense.id} expense={expense} />
         ))}
       </ul>
-    </>
+    </div>
   );
 }

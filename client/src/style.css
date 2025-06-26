@@ -5,6 +5,8 @@
   --color-acent: #00455c;
   --color-bg: #e1d5b5;
   --color-text: #1d6c5c;
+  --color-text-alert: #a63838;
+  --color-text-placeholder: #7e9a95;
 }
 
 /* general css */
@@ -50,17 +52,12 @@ button {
   border: 1px solid var(--color-secondary);
   color: var(--color-text);
   transition: all 0.2s ease-in-out;
+  cursor: pointer;
 }
 
 button:hover {
   color: var(--color-primary);
   background-color: var(--color-secondary);
-}
-
-button:active {
-  color: var(--color-primary);
-  background-color: var(--color-acent);
-  border-color: var(--color-acent);
 }
 
 h1,
@@ -75,6 +72,18 @@ h1 {
 
 h2 {
   font-size: 2rem;
+}
+
+input {
+  padding: 8px 12px;
+  border: 1px solid var(--color-secondary);
+  border-radius: 6px;
+  background-color: var(--color-primary);
+}
+
+input:focus {
+  outline: none;
+  border: 1px solid var(--color-secondary);
 }
 
 /* main container, used in all pages */
@@ -99,6 +108,12 @@ h2 {
   width: 20rem;
 }
 
+.narrow-col-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 /* general row container */
 
 .row-container {
@@ -106,6 +121,14 @@ h2 {
   align-items: flex-start;
   justify-content: center;
   padding: 1.5rem;
+}
+
+.row-left-container {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 1.5rem;
+  width: 100%;
 }
 
 /* Splitwise login page */
@@ -145,7 +168,6 @@ h2 {
   display: block;
   border: none;
   text-align: center;
-  cursor: pointer;
   border-bottom: 1px solid var(--color-bg);
   border-radius: 0;
 }
@@ -154,6 +176,125 @@ h2 {
   border-bottom: none;
 }
 
-/* .entity-container button:hover {
-    
-} */
+/* Splitwise range page */
+
+.sw-range input {
+  margin: 0.5rem;
+  color: var(--color-text);
+  min-height: 50px;
+}
+
+.sw-range input::placeholder {
+  color: var(--color-text-placeholder);
+}
+
+.sw-range button {
+  margin: 0.5rem;
+  background-color: var(--color-secondary);
+  color: var(--color-primary);
+}
+
+.sw-range button:hover {
+  background-color: var(--color-primary);
+  color: var(--color-secondary);
+}
+
+.range-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+/* Splitwise expenses page */
+
+.sw-expenses-header {
+  margin-bottom: 2rem;
+}
+
+/* SplitwiseExpense component */
+
+.sw-expense {
+  background-color: var(--color-primary);
+  border: 1px solid var(--color-secondary);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  border-radius: 12px;
+  padding: 10px;
+  margin: 15px;
+  min-width: 30rem;
+  overflow: hidden;
+}
+
+.sw-expense p {
+  color: var(--color-text-placeholder);
+}
+
+.sw-expense h2 {
+  font-size: 1.8rem;
+  margin-top: -4px;
+  margin-bottom: 5px;
+}
+
+.sw-expenses button {
+  margin: 0.5rem;
+  background-color: var(--color-secondary);
+  color: var(--color-primary);
+  padding: 10px 20px;
+}
+
+.sw-expenses button:hover {
+  background-color: var(--color-primary);
+  color: var(--color-secondary);
+}
+
+.sw-expense-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  margin-bottom: 10px;
+  width: 100%;
+  border-bottom: 1px solid var(--color-secondary);
+}
+
+.sw-expense-date {
+  background-color: var(--color-secondary);
+  width: 200%;
+  position: relative;
+  left: -10px;
+  top: -10px;
+}
+
+.sw-expense-date p {
+  margin: 7px;
+  color: var(--color-primary);
+  font-weight: 300;
+  font-size: 0.9rem;
+}
+
+.sw-expense-desc {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  width: 100%;
+}
+
+.cost-negative {
+  color: var(--color-text-alert);
+}
+
+/* SplitwiseRepayment component */
+.sw-repayment {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: space-between;
+}
+
+.sw-expense ul {
+  width: 100%;
+}

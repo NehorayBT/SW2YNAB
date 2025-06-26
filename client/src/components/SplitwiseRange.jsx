@@ -40,25 +40,42 @@ export default function SplitwiseRange() {
   };
 
   return (
-    <div>
-      <input
-        type="date"
-        value={swStartDate}
-        onChange={(e) => setSwStartDate(e.target.value)}
-      />
-      <input
-        type="date"
-        value={swEndDate}
-        onChange={(e) => setSwEndDate(e.target.value)}
-      />
-      <input
-        type="text"
-        value={swLimit}
-        onChange={(e) => setSwLimit(e.target.value)}
-        placeholder="Limit"
-      />
-      <button onClick={handleSubmit}>Submit</button>
-      <button onClick={() => setStep("splitwise")}>Go back</button>
+    <div className="main-col-container sw-range">
+      <div className="range-header">
+        <h1>choose Dates & Limit</h1>
+        <p>You can leave them blank if irrelevant</p>
+      </div>
+      <div className="row-container">
+        <div className="narrow-col-container">
+          <p>Start date</p>
+          <input
+            type="date"
+            value={swStartDate}
+            onChange={(e) => setSwStartDate(e.target.value)}
+          />
+        </div>
+        <div className="narrow-col-container">
+          <p>End date</p>
+          <input
+            type="date"
+            value={swEndDate}
+            onChange={(e) => setSwEndDate(e.target.value)}
+          />
+        </div>
+        <div className="narrow-col-container">
+          <p>Limit</p>
+          <input
+            type="number"
+            value={swLimit}
+            onChange={(e) => setSwLimit(e.target.value)}
+            placeholder="Limit"
+          />
+        </div>
+      </div>
+      <div className="row-container">
+        <button onClick={() => setStep("splitwise")}>Go back</button>
+        <button onClick={handleSubmit}>Submit</button>
+      </div>
     </div>
   );
 }
