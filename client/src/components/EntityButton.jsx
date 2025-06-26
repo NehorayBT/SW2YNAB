@@ -13,7 +13,7 @@ export default function EntityButton({ type, entity }) {
     console.log("type: " + type + "\nid: " + entity.id);
     setSwType(type);
     setSwId(entity.id);
-    setStep("splitwise_transactions");
+    setStep("splitwise_range");
   };
 
   return (

@@ -1,6 +1,7 @@
 import Login from "./Login";
 import SplitwiseLogin from "./SplitwiseLogin";
 import Splitwise from "./Splitwise";
+import SplitwiseRange from "./SplitwiseRange";
 import SplitwiseExpenses from "./SplitwiseExpenses";
 import YnabLogin from "./YnabLogin";
 import YNAB from "./YNAB";
@@ -12,7 +13,8 @@ export default function StepManager() {
 
   if (step === "splitwise_login") return <SplitwiseLogin />;
   if (step === "splitwise") return <Splitwise />;
-  if (step == "splitwise_transactions") return <SplitwiseExpenses />;
+  if (step === "splitwise_range") return <SplitwiseRange />;
+  if (step == "splitwise_expenses") return <SplitwiseExpenses />;
   if (step === "ynab_login") return <YnabLogin />;
   if (step == "ynab") return <YNAB />;
 

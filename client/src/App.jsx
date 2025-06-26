@@ -6,12 +6,28 @@ export const GlobalContext = createContext();
 
 function App() {
   const [step, setStep] = useState("splitwise_login");
-  const [swType, setSwType] = useState(null);
-  const [swId, setSwId] = useState(null);
+  const [swType, setSwType] = useState("");
+  const [swId, setSwId] = useState("");
+  const [swStartDate, setSwStartDate] = useState("");
+  const [swEndDate, setSwEndDate] = useState("");
+  const [swLimit, setSwLimit] = useState("");
 
   return (
     <GlobalContext.Provider
-      value={{ step, setStep, swType, setSwType, swId, setSwId }}
+      value={{
+        step,
+        setStep,
+        swType,
+        setSwType,
+        swId,
+        setSwId,
+        swStartDate,
+        setSwStartDate,
+        swEndDate,
+        setSwEndDate,
+        swLimit,
+        setSwLimit,
+      }}
     >
       <StepManager />
     </GlobalContext.Provider>

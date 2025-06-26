@@ -22,7 +22,10 @@ export default function SplitwiseLogin() {
     window.location.href = authUrl;
   };
 
-  return <button onClick={handleLogin}>Login with Splitwise</button>;
-
-  return;
+  return (
+    <div className="main-col-container">
+      <h1 className="login-header">SPLITWISE to YNAB</h1>
+      <button onClick={handleLogin}>Login with Splitwise</button>
+    </div>
+  );
 }

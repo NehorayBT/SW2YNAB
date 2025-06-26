@@ -3,13 +3,13 @@ import EntityButton from "./EntityButton";
 
 const fetchFriends = async () => {
   const res = await fetch("http://localhost:5000/api/splitwise/friends");
-  if (!res.ok) throw new Error("Not authorized");
+  if (!res.ok) throw new Error("Failed to fetch entities");
   return res.json();
 };
 
 const fetchGroups = async () => {
   const res = await fetch("http://localhost:5000/api/splitwise/groups");
-  if (!res.ok) throw new Error("Not authorized");
+  if (!res.ok) throw new Error("Failed to fetch entities");
   return res.json();
 };
 
@@ -32,24 +32,48 @@ export default function Splitwise() {
     queryFn: fetchGroups,
   });
 
-  if (loadingFriends || loadingGroups) return <p>Loading entities...</p>;
-  if (friendsError) return <p>Error: {friendsError.message}</p>;
-  if (groupsError) return <p>Error: {groupsError.message}</p>;
+  if (loadingFriends || loadingGroups)
+    return (
+      <div className="main-col-container">
+        <h1>Loading entities</h1>
+      </div>
+    );
+  if (friendsError)
+    return (
+      <div className="main-col-container">
+        <h1>Error</h1>
+        <h2>{friendsError.message}</h2>
+      </div>
+    );
+  if (groupsError)
+    return (
+      <div className="main-col-container">
+        <h1>Error</h1>
+        <h2>{groupsError.message}</h2>
+      </div>
+    );
 
   return (
-    <>
-      <h1>Friends</h1>
-      <ul>
-        {friendsData.friends.map((friend) => (
-          <EntityButton key={friend.id} type="friend" entity={friend} />
-        ))}
-      </ul>
-      <h1>Groups</h1>
-      <ul>
-        {groupsData.groups.map((group) => (
-          <EntityButton key={group.id} type="group" entity={group} />
-        ))}
-      </ul>
-    </>
+    <div className="main-col-container">
+      <h1>Choose entity</h1>
+      <div className="row-container">
+        <div className="col-container entity-container">
+          <h2 className="entity-type-header">Friends</h2>
+          <ul>
+            {friendsData.friends.map((friend) => (
+              <EntityButton key={friend.id} type="friend" entity={friend} />
+            ))}
+          </ul>
+        </div>
+        <div className="col-container entity-container">
+          <h2 className="entity-type-header">Groups</h2>
+          <ul>
+            {groupsData.groups.map((group) => (
+              <EntityButton key={group.id} type="group" entity={group} />
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
   );
 }
