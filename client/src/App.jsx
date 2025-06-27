@@ -1,4 +1,4 @@
-import { useState, createContext } from "react";
+import { useState, useEffect, createContext } from "react";
 import StepManager from "./components/StepManager";
 import "./style.css";
 
@@ -11,6 +11,9 @@ function App() {
   const [swStartDate, setSwStartDate] = useState("");
   const [swEndDate, setSwEndDate] = useState("");
   const [swLimit, setSwLimit] = useState("");
+  const [swExpenses, setSwExpenses] = useState([]);
+  const [ynabAccountId, setYnabAccountId] = useState("");
+  const [ynabBudgetId, setYnabBudgetId] = useState("");
 
   return (
     <GlobalContext.Provider
@@ -27,6 +30,12 @@ function App() {
         setSwEndDate,
         swLimit,
         setSwLimit,
+        swExpenses,
+        setSwExpenses,
+        ynabAccountId,
+        setYnabAccountId,
+        ynabBudgetId,
+        setYnabBudgetId,
       }}
     >
       <StepManager />

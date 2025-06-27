@@ -31,11 +31,6 @@ export default function SplitwiseRange() {
     if (swStartDate != "") setSwStartDate(startDate);
     if (swEndDate != "") setSwEndDate(endDate);
 
-    // logging
-    console.log("Selected start date:", swStartDate);
-    console.log("Selected end date:", swEndDate);
-    console.log("Entered limit:", swLimit);
-
     setStep("splitwise_expenses");
   };
 

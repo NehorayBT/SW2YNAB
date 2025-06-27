@@ -1,9 +1,15 @@
+import { useContext } from "react";
+import { GlobalContext } from "../App";
 import SplitwiseRepayment from "./SplitwiseRepayment";
 
-export default function SplitwiseExpense({ expense, localData, setLocalData }) {
+export default function SplitwiseExpense({ expense }) {
+  const { swExpenses, setSwExpenses } = useContext(GlobalContext);
+
   const handleClick = () => {
-    const filteredData = localData.filter((item) => item.id !== expense.id);
-    setLocalData(filteredData);
+    const filteredExpenses = swExpenses.filter(
+      (item) => item.id !== expense.id
+    );
+    setSwExpenses(filteredExpenses);
   };
   return (
     <li>

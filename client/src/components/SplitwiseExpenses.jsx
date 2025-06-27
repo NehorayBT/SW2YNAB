@@ -5,11 +5,18 @@ import SplitwiseExpense from "./SplitwiseExpense";
 import cloneDeep from "lodash/cloneDeep";
 
 export default function SplitwiseExpenses() {
-  const { swType, swId, swStartDate, swEndDate, swLimit, setStep } =
-    useContext(GlobalContext);
+  const {
+    swType,
+    swId,
+    swStartDate,
+    swEndDate,
+    swLimit,
+    setStep,
+    swExpenses,
+    setSwExpenses,
+  } = useContext(GlobalContext);
 
-  const [localData, setLocalData] = useState([]);
-
+  // handling fetching the expenses using react-query
   const fetchExpenses = async () => {
     // --- adding relevant parameters ---
 
@@ -28,15 +35,34 @@ export default function SplitwiseExpenses() {
     if (!res.ok) throw new Error("Failed to fetch expenses");
 
     const json = await res.json();
-    setLocalData(cloneDeep(json.expenses));
     return json;
   };
 
+  // react query hook to fetch expenses
   const { data, isLoading, error } = useQuery({
     queryKey: ["expenses", swType, swId, swStartDate, swEndDate, swLimit],
     queryFn: fetchExpenses,
   });
 
+  useEffect(() => {
+    if (data?.expenses) {
+      setSwExpenses(cloneDeep(data.expenses));
+    }
+  }, [data]);
+
+  // OAuth things
+  const clientId = import.meta.env.VITE_YNAB_CLIENT_ID;
+  const redirectUri = import.meta.env.VITE_YNAB_REDIRECT_URI;
+  const authUrl = `https://app.ynab.com/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(
+    redirectUri
+  )}&response_type=code`;
+
+  const handleLogin = () => {
+    localStorage.setItem("swExpenses", JSON.stringify(swExpenses));
+    window.location.href = authUrl;
+  };
+
+  // rendering
   if (isLoading)
     return (
       <div className="main-col-container">
@@ -54,15 +80,15 @@ export default function SplitwiseExpenses() {
   return (
     <div className="main-col-container sw-expenses">
       <h1 className="sw-expenses-header">Splitwise expenses</h1>
-      <button onClick={() => setStep("splitwise_range")}>Go back</button>
+      <div className="buttons-row-container">
+        <button onClick={() => setStep("splitwise_range")}>Go back</button>
+        <button className="grow-button" onClick={handleLogin}>
+          Login to YNAB and export
+        </button>
+      </div>
       <ul>
-        {localData.map((expense) => (
-          <SplitwiseExpense
-            key={expense.id}
-            expense={expense}
-            localData={localData}
-            setLocalData={setLocalData}
-          />
+        {swExpenses.map((expense) => (
+          <SplitwiseExpense key={expense.id} expense={expense} />
         ))}
       </ul>
     </div>

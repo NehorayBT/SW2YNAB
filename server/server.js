@@ -7,13 +7,16 @@ const cors = require("cors");
 dotenv.config();
 const app = express();
 app.use(cors());
+app.use(express.json());
 
-// the token used for all api-request with splitwise
+// the token used for all api-requests with splitwise
 let splitwise_token = null;
+// the token used for all api-requests with ynab
+let ynab_token = null;
 // the current user information in splitwise
 let splitwise_current_user = null;
 
-// for authentication
+// for splitwise authentication
 app.get("/auth/splitwise/callback", async (req, res) => {
   const { code } = req.query;
 
@@ -26,7 +29,7 @@ app.get("/auth/splitwise/callback", async (req, res) => {
         code,
         client_id: process.env.SPLITWISE_CONSUMER_KEY,
         client_secret: process.env.SPLITWISE_CONSUMER_SECRET,
-        redirect_uri: process.env.REDIRECT_URI,
+        redirect_uri: process.env.SPLITWISE_REDIRECT_URI,
       }),
       {
         headers: {
@@ -59,12 +62,140 @@ app.get("/auth/splitwise/callback", async (req, res) => {
     // saving current user
     splitwise_current_user = response.data.user;
     // redirecting
-    res.redirect(`http://localhost:5173?success=true`);
+    res.redirect(`http://localhost:5173?sw_success=true`);
   } catch (err) {
     console.error("Error fetching user info", err.response?.data || err);
     res.status(400).send("Failed to fetch user info");
   }
 });
+
+// for ynab authentication
+app.get("/auth/ynab/callback", async (req, res) => {
+  const { code } = req.query;
+
+  // exchanging the token
+  try {
+    const tokenRes = await axios.post(
+      "https://app.ynab.com/oauth/token",
+      new URLSearchParams({
+        client_id: process.env.YNAB_CLIENT_ID,
+        client_secret: process.env.YNAB_CLIENT_SECRET,
+        redirect_uri: process.env.YNAB_REDIRECT_URI,
+        grant_type: "authorization_code",
+        code,
+      }),
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      }
+    );
+
+    // Token received!
+    const { access_token } = tokenRes.data;
+    // for later use
+    ynab_token = access_token;
+    res.redirect(`http://localhost:5173?ynab_success=true`);
+  } catch (err) {
+    console.error("Error exchanging token:", err.response?.data || err);
+    res.status(500).send("OAuth failed");
+    return;
+  }
+});
+
+// ---YNAB-RELATED-API---
+
+// for getting user's info
+app.get("/api/ynab/user", async (req, res) => {
+  // if ynab is not yet authenticated
+  if (!ynab_token) return res.status(401).send("Not authenticated");
+
+  // trying to get the user's info from ynab
+  try {
+    const response = await axios.get("https://api.ynab.com/v1/user", {
+      headers: {
+        Authorization: `Bearer ${ynab_token}`,
+      },
+    });
+    // returning the data to the front-end
+    res.json(response.data.data);
+  } catch (err) {
+    // error
+    res.status(500).send("Failed to fetch user info");
+  }
+});
+
+// for getting user's budgets
+app.get("/api/ynab/budgets", async (req, res) => {
+  // if ynab is not yet authenticated
+  if (!ynab_token) return res.status(401).send("Not authenticated");
+
+  // trying to get the user's budgets from ynab
+  try {
+    const response = await axios.get("https://api.ynab.com/v1/budgets", {
+      headers: {
+        Authorization: `Bearer ${ynab_token}`,
+      },
+    });
+    // returning the data to the front-end
+    res.json(response.data.data);
+  } catch (err) {
+    // error
+    res.status(500).send("Failed to fetch budgets");
+  }
+});
+
+// for getting user's bank accounts (for a specific budget)
+app.get("/api/ynab/budgets/:budget_id/accounts", async (req, res) => {
+  // if ynab is not yet authenticated
+  if (!ynab_token) return res.status(401).send("Not authenticated");
+
+  const { budget_id } = req.params;
+
+  // trying to get the user's budgets from ynab
+  try {
+    const response = await axios.get(
+      `https://api.ynab.com/v1/budgets/${budget_id}/accounts`,
+      {
+        headers: {
+          Authorization: `Bearer ${ynab_token}`,
+        },
+      }
+    );
+    // returning the data to the front-end
+    res.json(response.data.data);
+  } catch (err) {
+    // error
+    res.status(500).send("Failed to fetch budget's accounts'");
+  }
+});
+
+app.post("/api/ynab/budgets/:budget_id/transactions", async (req, res) => {
+  if (!ynab_token) return res.status(401).send("Not authenticated");
+
+  const { budget_id } = req.params;
+  const transactionsData = req.body; // assuming the POST body contains new account info
+
+  try {
+    const response = await axios.post(
+      `https://api.ynab.com/v1/budgets/${budget_id}/transactions`,
+      transactionsData,
+      {
+        headers: {
+          Authorization: `Bearer ${ynab_token}`,
+          "Content-Type": "application/json", // usually needed for POST JSON
+        },
+      }
+    );
+
+    res.json(response.data);
+  } catch (err) {
+    console.log(err.response.data);
+    res.status(500).send("Failed to export transactions");
+  }
+});
+
+// ---SPLITWISE-RELATED-API---
 
 // for getting user's friends
 app.get("/api/splitwise/friends", async (req, res) => {

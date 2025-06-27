@@ -212,6 +212,17 @@ input:focus {
   margin-bottom: 2rem;
 }
 
+.buttons-row-container {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  width: 30rem;
+}
+
+.grow-button {
+  flex: 1;
+}
+
 /* SplitwiseExpense component */
 
 .sw-expense {
@@ -323,4 +334,14 @@ input:focus {
 
 .sw-expense li:last-child {
   margin-bottom: 0;
+}
+
+/* Ynab export page */
+
+.export-header {
+  margin-bottom: 10px;
+}
+
+.export-p {
+  margin-bottom: 50px;
 }

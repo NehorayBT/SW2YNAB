@@ -1,10 +1,10 @@
-import Login from "./Login";
 import SplitwiseLogin from "./SplitwiseLogin";
 import Splitwise from "./Splitwise";
 import SplitwiseRange from "./SplitwiseRange";
 import SplitwiseExpenses from "./SplitwiseExpenses";
-import YnabLogin from "./YnabLogin";
-import YNAB from "./YNAB";
+import YnabBudgets from "./YnabBudgets";
+import YnabAccounts from "./YnabAccounts";
+import YnabExport from "./YnabExport";
 import { GlobalContext } from "../App";
 import { useContext, useEffect } from "react";
 
@@ -15,8 +15,9 @@ export default function StepManager() {
   if (step === "splitwise") return <Splitwise />;
   if (step === "splitwise_range") return <SplitwiseRange />;
   if (step == "splitwise_expenses") return <SplitwiseExpenses />;
-  if (step === "ynab_login") return <YnabLogin />;
-  if (step == "ynab") return <YNAB />;
+  if (step === "ynab_budgets") return <YnabBudgets />;
+  if (step === "ynab_accounts") return <YnabAccounts />;
+  if (step === "ynab_export") return <YnabExport />;
 
   console.log("Step not found");
 }

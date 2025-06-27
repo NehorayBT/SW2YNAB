@@ -10,7 +10,6 @@ export default function EntityButton({ type, entity }) {
       : entity.name;
 
   const onClick = () => {
-    console.log("type: " + type + "\nid: " + entity.id);
     setSwType(type);
     setSwId(entity.id);
     setStep("splitwise_range");
