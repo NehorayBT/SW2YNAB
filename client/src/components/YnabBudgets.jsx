@@ -1,40 +1,39 @@
 import { useQuery } from "@tanstack/react-query";
 import { useContext } from "react";
 import { GlobalContext } from "../App";
-
-const fetchBudgets = async () => {
-  const res = await fetch("http://localhost:5000/api/ynab/budgets");
-  if (!res.ok) throw new Error("Failed to fetch budgets");
-  return res.json();
-};
+import LoadingComponent from "./LoadingComponent";
+import ErrorComponent from "./ErrorComponent";
 
 export default function YnabBudgets() {
+  // a function to fetch the current user's budgets
+  const fetchBudgets = async () => {
+    const res = await fetch("http://localhost:5000/api/ynab/budgets");
+    if (!res.ok) throw new Error("Failed to fetch budgets");
+    return res.json();
+  };
+
+  // react query
   const { data, isLoading, error } = useQuery({
     queryKey: ["budgets"],
     queryFn: fetchBudgets,
   });
 
-  const { setStep, setYnabBudgetId, swExpenses } = useContext(GlobalContext);
+  // importing global context
+  const { setStep, setYnabBudgetId } = useContext(GlobalContext);
 
+  // handling clicking on one of the budgets
   const onClick = (id) => {
+    // updating the selected budget's state
     setYnabBudgetId(id);
+    // moving to the next step
     setStep("ynab_accounts");
   };
 
-  if (isLoading)
-    return (
-      <div className="main-col-container">
-        <h1>Loading budgets</h1>
-      </div>
-    );
-  if (error)
-    return (
-      <div className="main-col-container">
-        <h1>Error</h1>
-        <h2>{error.message}</h2>
-      </div>
-    );
+  // handling render of loading/error based on query's state
+  if (isLoading) return <LoadingComponent />;
+  if (error) return <ErrorComponent message="error.message" />;
 
+  // rendering
   return (
     <div className="main-col-container">
       <h1>Choose budget</h1>

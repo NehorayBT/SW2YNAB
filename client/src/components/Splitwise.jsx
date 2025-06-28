@@ -1,12 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
 import EntityButton from "./EntityButton";
+import ErrorComponent from "./ErrorComponent";
+import LoadingComponent from "./LoadingComponent";
 
+// a function to fetch splitwise friends
 const fetchFriends = async () => {
   const res = await fetch("http://localhost:5000/api/splitwise/friends");
   if (!res.ok) throw new Error("Failed to fetch entities");
   return res.json();
 };
 
+// a function to fetch splitwise groups
 const fetchGroups = async () => {
   const res = await fetch("http://localhost:5000/api/splitwise/groups");
   if (!res.ok) throw new Error("Failed to fetch entities");
@@ -14,6 +18,7 @@ const fetchGroups = async () => {
 };
 
 export default function Splitwise() {
+  // react-query request to fetch friends
   const {
     data: friendsData,
     isLoading: loadingFriends,
@@ -23,6 +28,7 @@ export default function Splitwise() {
     queryFn: fetchFriends,
   });
 
+  // react-query request to fetch groups
   const {
     data: groupsData,
     isLoading: loadingGroups,
@@ -32,26 +38,10 @@ export default function Splitwise() {
     queryFn: fetchGroups,
   });
 
-  if (loadingFriends || loadingGroups)
-    return (
-      <div className="main-col-container">
-        <h1>Loading entities</h1>
-      </div>
-    );
-  if (friendsError)
-    return (
-      <div className="main-col-container">
-        <h1>Error</h1>
-        <h2>{friendsError.message}</h2>
-      </div>
-    );
-  if (groupsError)
-    return (
-      <div className="main-col-container">
-        <h1>Error</h1>
-        <h2>{groupsError.message}</h2>
-      </div>
-    );
+  // return Loading/Error components, depends on query's state
+  if (loadingFriends || loadingGroups) return <LoadingComponent />;
+  if (friendsError) return <ErrorComponent message={friendsError.message} />;
+  if (groupsError) return <ErrorComponent message={groupError.message} />;
 
   return (
     <div className="main-col-container">

@@ -5,6 +5,7 @@ import "./style.css";
 export const GlobalContext = createContext();
 
 function App() {
+  // managing all the state of the App
   const [step, setStep] = useState("splitwise_login");
   const [swType, setSwType] = useState("");
   const [swId, setSwId] = useState("");
@@ -15,6 +16,7 @@ function App() {
   const [ynabAccountId, setYnabAccountId] = useState("");
   const [ynabBudgetId, setYnabBudgetId] = useState("");
 
+  // wrapping in a GlobalContext provider
   return (
     <GlobalContext.Provider
       value={{

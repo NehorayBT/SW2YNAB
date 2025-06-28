@@ -6,10 +6,12 @@ import YnabBudgets from "./YnabBudgets";
 import YnabAccounts from "./YnabAccounts";
 import YnabExport from "./YnabExport";
 import { GlobalContext } from "../App";
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 
+// this is a main component that manages and renders the current step we're in
+// (each step is a different component)
 export default function StepManager() {
-  const { step, setStep } = useContext(GlobalContext);
+  const { step } = useContext(GlobalContext);
 
   if (step === "splitwise_login") return <SplitwiseLogin />;
   if (step === "splitwise") return <Splitwise />;

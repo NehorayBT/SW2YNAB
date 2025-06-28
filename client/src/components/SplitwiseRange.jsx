@@ -1,7 +1,5 @@
 import { useContext } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { GlobalContext } from "../App";
-import SplitwiseExpense from "./SplitwiseExpense";
 
 export default function SplitwiseRange() {
   const {
@@ -14,14 +12,17 @@ export default function SplitwiseRange() {
     setSwLimit,
   } = useContext(GlobalContext);
 
+  // when clicking submit
   const handleSubmit = () => {
     // editing dates to match SW format (or stay empty if not added)
 
+    // formating start-date
     const startDate =
       swStartDate == ""
         ? ""
         : new Date(swStartDate).toISOString().replace(/\.\d{3}Z$/, "Z");
 
+    // formatting end-date
     const endDate =
       swEndDate == ""
         ? ""

@@ -1,4 +1,4 @@
-export default function SplitwiseRepayment({ repayment, index }) {
+export default function SplitwiseRepayment({ repayment }) {
   const factor = repayment.lender ? 1 : -1;
 
   return (

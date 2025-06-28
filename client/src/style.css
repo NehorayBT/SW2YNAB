@@ -345,3 +345,19 @@ input:focus {
 .export-p {
   margin-bottom: 50px;
 }
+
+/* Ynab export page */
+
+#expo-success {
+  margin-bottom: 2rem;
+}
+
+#expo-success-p {
+  margin-bottom: 0.8rem;
+}
+
+/* ErrorComponent */
+
+#error-message {
+  margin-bottom: 1rem;
+}

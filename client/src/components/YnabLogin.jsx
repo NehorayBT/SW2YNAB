@@ -17,6 +17,4 @@ export default function YnabLogin() {
       <button>Login with Splitwise</button>
     </a>
   );
-
-  return;
 }

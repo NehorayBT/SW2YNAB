@@ -170,11 +170,12 @@ app.get("/api/ynab/budgets/:budget_id/accounts", async (req, res) => {
   }
 });
 
+// for posting the transactions to YNAB
 app.post("/api/ynab/budgets/:budget_id/transactions", async (req, res) => {
   if (!ynab_token) return res.status(401).send("Not authenticated");
 
   const { budget_id } = req.params;
-  const transactionsData = req.body; // assuming the POST body contains new account info
+  const transactionsData = req.body;
 
   try {
     const response = await axios.post(
@@ -225,7 +226,7 @@ app.get("/api/splitwise/groups", async (req, res) => {
   // if splitwise is not yet authenticated
   if (!splitwise_token) return res.status(401).send("Not authenticated");
 
-  // trying to get the user's friends from splitwise
+  // trying to get the user's groups from splitwise
   try {
     const response = await axios.get(
       "https://secure.splitwise.com/api/v3.0/get_groups",
