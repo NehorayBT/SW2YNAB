@@ -5,14 +5,18 @@ import LoadingComponent from "./LoadingComponent";
 
 // a function to fetch splitwise friends
 const fetchFriends = async () => {
-  const res = await fetch("http://localhost:5000/api/splitwise/friends");
+  const res = await fetch(
+    `${import.meta.env.VITE_API_BASE_URL}/api/splitwise/friends`
+  );
   if (!res.ok) throw new Error("Failed to fetch entities");
   return res.json();
 };
 
 // a function to fetch splitwise groups
 const fetchGroups = async () => {
-  const res = await fetch("http://localhost:5000/api/splitwise/groups");
+  const res = await fetch(
+    `${import.meta.env.VITE_API_BASE_URL}/api/splitwise/groups`
+  );
   if (!res.ok) throw new Error("Failed to fetch entities");
   return res.json();
 };

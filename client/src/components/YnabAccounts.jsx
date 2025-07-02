@@ -10,7 +10,9 @@ export default function YnabAccounts() {
   // a function to fetch the current user's bank accounts (which are set-up in YNAB)
   const fetchAccounts = async () => {
     const res = await fetch(
-      `http://localhost:5000/api/ynab/budgets/${ynabBudgetId}/accounts`
+      `${
+        import.meta.env.VITE_API_BASE_URL
+      }/api/ynab/budgets/${ynabBudgetId}/accounts`
     );
     if (!res.ok) throw new Error("Failed to fetch accounts");
     return res.json();

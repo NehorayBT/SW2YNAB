@@ -80,7 +80,9 @@ export default function YnabExport() {
   // a function to handle sending the transactions to YNAB
   const postData = async (data) => {
     const res = await fetch(
-      `http://localhost:5000/api/ynab/budgets/${ynabBudgetId}/transactions`,
+      `${
+        import.meta.env.VITE_API_BASE_URL
+      }/api/ynab/budgets/${ynabBudgetId}/transactions`,
       {
         method: "POST",
         headers: {

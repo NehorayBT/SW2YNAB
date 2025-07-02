@@ -5,6 +5,7 @@ import SplitwiseExpense from "./SplitwiseExpense";
 import cloneDeep from "lodash/cloneDeep";
 import ErrorComponent from "./ErrorComponent";
 import LoadingComponent from "./LoadingComponent";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function SplitwiseExpenses() {
   const {
@@ -37,7 +38,9 @@ export default function SplitwiseExpenses() {
 
     // fetch the actual data (splitwise expenses)
     const res = await fetch(
-      `http://localhost:5000/api/splitwise/expenses?${params.toString()}`
+      `${
+        import.meta.env.VITE_API_BASE_URL
+      }/api/splitwise/expenses?${params.toString()}`
     );
     if (!res.ok) throw new Error("Failed to fetch expenses");
 
@@ -90,9 +93,26 @@ export default function SplitwiseExpenses() {
         </button>
       </div>
       <ul>
-        {swExpenses.map((expense) => (
-          <SplitwiseExpense key={expense.id} expense={expense} />
-        ))}
+        <AnimatePresence>
+          {swExpenses.map((expense) => (
+            <motion.li
+              key={expense.id}
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <SplitwiseExpense
+                expense={expense}
+                onDelete={() =>
+                  setSwExpenses((prev) =>
+                    prev.filter((e) => e.id !== expense.id)
+                  )
+                }
+              />
+            </motion.li>
+          ))}
+        </AnimatePresence>
       </ul>
     </div>
   );
