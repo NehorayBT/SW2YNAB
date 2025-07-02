@@ -62,7 +62,7 @@ app.get("/auth/splitwise/callback", async (req, res) => {
     // saving current user
     splitwise_current_user = response.data.user;
     // redirecting
-    res.redirect(`http://localhost:5173?sw_success=true`);
+    res.redirect(`${process.env.FRONTEND_URL}?sw_success=true`);
   } catch (err) {
     console.error("Error fetching user info", err.response?.data || err);
     res.status(400).send("Failed to fetch user info");
@@ -95,7 +95,7 @@ app.get("/auth/ynab/callback", async (req, res) => {
     const { access_token } = tokenRes.data;
     // for later use
     ynab_token = access_token;
-    res.redirect(`http://localhost:5173?ynab_success=true`);
+    res.redirect(`${process.env.FRONTEND_URL}?ynab_success=true`);
   } catch (err) {
     console.error("Error exchanging token:", err.response?.data || err);
     res.status(500).send("OAuth failed");
