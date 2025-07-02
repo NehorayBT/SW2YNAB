@@ -29,7 +29,7 @@ app.get("/auth/splitwise/callback", async (req, res) => {
         code,
         client_id: process.env.SPLITWISE_CONSUMER_KEY,
         client_secret: process.env.SPLITWISE_CONSUMER_SECRET,
-        redirect_uri: process.env.SPLITWISE_REDIRECT_URI,
+        redirect_uri: `${process.env.API_BASE_URL}/auth/splitwise/callback`,
       }),
       {
         headers: {
@@ -80,7 +80,7 @@ app.get("/auth/ynab/callback", async (req, res) => {
       new URLSearchParams({
         client_id: process.env.YNAB_CLIENT_ID,
         client_secret: process.env.YNAB_CLIENT_SECRET,
-        redirect_uri: process.env.YNAB_REDIRECT_URI,
+        redirect_uri: `${process.env.API_BASE_URL}/auth/ynab/callback`,
         grant_type: "authorization_code",
         code,
       }),

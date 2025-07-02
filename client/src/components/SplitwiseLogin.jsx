@@ -44,7 +44,9 @@ export default function SplitwiseLogin() {
 
   // getting key and uri from the .env file
   const consumerKey = import.meta.env.VITE_SPLITWISE_CONSUMER_KEY;
-  const redirectUri = import.meta.env.VITE_SPLITWISE_REDIRECT_URI;
+  const redirectUri = `${
+    import.meta.env.VITE_API_BASE_URL
+  }/auth/splitwise/callback`;
   // setting the auth url to redirect into
   const authUrl = `https://secure.splitwise.com/oauth/authorize?response_type=code&client_id=${consumerKey}&redirect_uri=${encodeURIComponent(
     redirectUri

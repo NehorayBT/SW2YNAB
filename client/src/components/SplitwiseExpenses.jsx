@@ -65,7 +65,7 @@ export default function SplitwiseExpenses() {
 
   // YNAB's OAuth things
   const clientId = import.meta.env.VITE_YNAB_CLIENT_ID;
-  const redirectUri = import.meta.env.VITE_YNAB_REDIRECT_URI;
+  const redirectUri = `${import.meta.env.VITE_API_BASE_URL}/auth/ynab/callback`;
   const authUrl = `https://app.ynab.com/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(
     redirectUri
   )}&response_type=code`;
