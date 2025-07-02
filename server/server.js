@@ -347,7 +347,7 @@ app.get("/api/splitwise/expenses", async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT;
 app.listen(PORT, () => {
   console.log(`Server running`);
 });
