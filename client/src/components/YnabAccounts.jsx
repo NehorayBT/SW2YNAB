@@ -12,7 +12,12 @@ export default function YnabAccounts() {
     const res = await fetch(
       `${
         import.meta.env.VITE_API_BASE_URL
-      }/api/ynab/budgets/${ynabBudgetId}/accounts`
+      }/api/ynab/budgets/${ynabBudgetId}/accounts`,
+      {
+        headers: {
+          Authorization: `Session ${sessionStorage.getItem("ynab_session_id")}`,
+        },
+      }
     );
     if (!res.ok) throw new Error("Failed to fetch accounts");
     return res.json();

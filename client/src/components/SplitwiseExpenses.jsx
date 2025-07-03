@@ -40,7 +40,12 @@ export default function SplitwiseExpenses() {
     const res = await fetch(
       `${
         import.meta.env.VITE_API_BASE_URL
-      }/api/splitwise/expenses?${params.toString()}`
+      }/api/splitwise/expenses?${params.toString()}`,
+      {
+        headers: {
+          Authorization: `Session ${sessionStorage.getItem("sw_session_id")}`,
+        },
+      }
     );
     if (!res.ok) throw new Error("Failed to fetch expenses");
 

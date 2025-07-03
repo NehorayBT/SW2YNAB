@@ -87,6 +87,7 @@ export default function YnabExport() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Session ${sessionStorage.getItem("ynab_session_id")}`,
         },
         body: JSON.stringify(data),
       }

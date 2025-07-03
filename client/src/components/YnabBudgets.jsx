@@ -8,7 +8,12 @@ export default function YnabBudgets() {
   // a function to fetch the current user's budgets
   const fetchBudgets = async () => {
     const res = await fetch(
-      `${import.meta.env.VITE_API_BASE_URL}/api/ynab/budgets`
+      `${import.meta.env.VITE_API_BASE_URL}/api/ynab/budgets`,
+      {
+        headers: {
+          Authorization: `Session ${sessionStorage.getItem("ynab_session_id")}`,
+        },
+      }
     );
     if (!res.ok) throw new Error("Failed to fetch budgets");
     return res.json();

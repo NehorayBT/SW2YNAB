@@ -21,6 +21,16 @@ export default function SplitwiseLogin() {
     const params = new URLSearchParams(window.location.search);
     const sw_success = params.get("sw_success");
     const ynab_success = params.get("ynab_success");
+    // getting the sessionID and saving it in sessionStorage (we'll need it for API requests later)
+    const sw_session_id = params.get("sw_session_id");
+    const ynab_session_id = params.get("ynab_session_id");
+    if (sw_session_id) {
+      sessionStorage.setItem("sw_session_id", sw_session_id);
+      removeParam("sw_session_id");
+    } else if (ynab_session_id) {
+      sessionStorage.setItem("ynab_session_id", ynab_session_id);
+      removeParam("ynab_session_id");
+    }
     // if splitwise authentication was succesful
     if (sw_success === "true") {
       // move to the 'splitwise' step

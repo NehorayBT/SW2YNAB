@@ -3,6 +3,7 @@ const express = require("express");
 const axios = require("axios");
 const dotenv = require("dotenv");
 const cors = require("cors");
+const jwt = require("jsonwebtoken");
 
 dotenv.config();
 const app = express();
@@ -16,9 +17,65 @@ let ynab_token = null;
 // the current user information in splitwise
 let splitwise_current_user = null;
 
+// for storing sessions id (unique to each user of the app, one for each platform).
+// those id's gives us the mapping to corresponding sw/ynab tokens.
+const splitwise_sessions = new Map();
+const ynab_sessions = new Map();
+
+// creates a new sw session, containing the splitwise token. returns the session id.
+const createSplitwiseSession = (splitwise_token) => {
+  // a unique session id to identify this specific user (user of OUR app)
+  const sessionID = crypto.randomUUID();
+  // creating a JWT token with the sessionID
+  splitwise_sessions[sessionID] = {
+    splitwise_token,
+  };
+  return sessionID;
+};
+
+// creates a new sw session, containing the splitwise token. returns the session id.
+const createYnabSession = (ynab_token) => {
+  // a unique session id to identify this specific user (user of OUR app)
+  const sessionID = crypto.randomUUID();
+  // creating a JWT token with the sessionID
+  ynab_sessions[sessionID] = {
+    ynab_token,
+  };
+  return sessionID;
+};
+
+const ensureSessionFromReq = (req, res, next, sessions) => {
+  const authHeader = req.headers.authorization || "";
+  if (authHeader.startsWith("Session ")) {
+    // remove "Session " prefix
+    const sessionID = authHeader.slice(8);
+
+    // check if session exist (by sessionID)
+    if (sessions[sessionID]) {
+      // attach the session data (sw/ynab tokens, sw_user info) to the request
+      req.session = sessions[sessionID];
+      // attach the sessionID itself to the request
+      req.sessionID = sessionID;
+      return next();
+    }
+  }
+  // No valid session found
+  res.status(401).send("Splitwise not authenticated");
+};
+
+const ensureSplitwiseAuth = (req, res, next) => {
+  return ensureSessionFromReq(req, res, next, splitwise_sessions);
+};
+
+const ensureYNABAuth = (req, res, next) => {
+  return ensureSessionFromReq(req, res, next, ynab_sessions);
+};
+
 // for splitwise authentication
 app.get("/auth/splitwise/callback", async (req, res) => {
   const { code } = req.query;
+
+  let sessionID = null;
 
   // exchanging the token
   try {
@@ -40,8 +97,8 @@ app.get("/auth/splitwise/callback", async (req, res) => {
 
     // Token received!
     const { access_token } = tokenRes.data;
-    // for later use
-    splitwise_token = access_token;
+    // creating a new session and saving its id in sessionID
+    sessionID = createSplitwiseSession(access_token);
   } catch (err) {
     console.error("Error exchanging token:", err.response?.data || err);
     res.status(500).send("OAuth failed");
@@ -54,15 +111,18 @@ app.get("/auth/splitwise/callback", async (req, res) => {
       "https://secure.splitwise.com/api/v3.0/get_current_user",
       {
         headers: {
-          Authorization: `Bearer ${splitwise_token}`,
+          Authorization: `Bearer ${splitwise_sessions[sessionID].splitwise_token}`,
         },
       }
     );
 
     // saving current user
-    splitwise_current_user = response.data.user;
-    // redirecting
-    res.redirect(`${process.env.FRONTEND_URL}?sw_success=true`);
+    splitwise_sessions[sessionID].splitwise_current_user = response.data.user;
+
+    // redirecting and transfering the sessionID
+    res.redirect(
+      `${process.env.FRONTEND_URL}?sw_success=true&sw_session_id=${sessionID}`
+    );
   } catch (err) {
     console.error("Error fetching user info", err.response?.data || err);
     res.status(400).send("Failed to fetch user info");
@@ -72,6 +132,8 @@ app.get("/auth/splitwise/callback", async (req, res) => {
 // for ynab authentication
 app.get("/auth/ynab/callback", async (req, res) => {
   const { code } = req.query;
+
+  let sessionID = null;
 
   // exchanging the token
   try {
@@ -94,8 +156,10 @@ app.get("/auth/ynab/callback", async (req, res) => {
     // Token received!
     const { access_token } = tokenRes.data;
     // for later use
-    ynab_token = access_token;
-    res.redirect(`${process.env.FRONTEND_URL}?ynab_success=true`);
+    sessionID = createYnabSession(access_token);
+    res.redirect(
+      `${process.env.FRONTEND_URL}?ynab_success=true&ynab_session_id=${sessionID}`
+    );
   } catch (err) {
     console.error("Error exchanging token:", err.response?.data || err);
     res.status(500).send("OAuth failed");
@@ -106,6 +170,8 @@ app.get("/auth/ynab/callback", async (req, res) => {
 // ---YNAB-RELATED-API---
 
 // for getting user's info
+
+// DELETE ME ########################################################################
 app.get("/api/ynab/user", async (req, res) => {
   // if ynab is not yet authenticated
   if (!ynab_token) return res.status(401).send("Not authenticated");
@@ -124,17 +190,15 @@ app.get("/api/ynab/user", async (req, res) => {
     res.status(500).send("Failed to fetch user info");
   }
 });
+// DELETE ME ########################################################################
 
 // for getting user's budgets
-app.get("/api/ynab/budgets", async (req, res) => {
-  // if ynab is not yet authenticated
-  if (!ynab_token) return res.status(401).send("Not authenticated");
-
+app.get("/api/ynab/budgets", ensureYNABAuth, async (req, res) => {
   // trying to get the user's budgets from ynab
   try {
     const response = await axios.get("https://api.ynab.com/v1/budgets", {
       headers: {
-        Authorization: `Bearer ${ynab_token}`,
+        Authorization: `Bearer ${req.session.ynab_token}`,
       },
     });
     // returning the data to the front-end
@@ -146,62 +210,66 @@ app.get("/api/ynab/budgets", async (req, res) => {
 });
 
 // for getting user's bank accounts (for a specific budget)
-app.get("/api/ynab/budgets/:budget_id/accounts", async (req, res) => {
-  // if ynab is not yet authenticated
-  if (!ynab_token) return res.status(401).send("Not authenticated");
+app.get(
+  "/api/ynab/budgets/:budget_id/accounts",
+  ensureYNABAuth,
+  async (req, res) => {
+    const { budget_id } = req.params;
 
-  const { budget_id } = req.params;
-
-  // trying to get the user's budgets from ynab
-  try {
-    const response = await axios.get(
-      `https://api.ynab.com/v1/budgets/${budget_id}/accounts`,
-      {
-        headers: {
-          Authorization: `Bearer ${ynab_token}`,
-        },
-      }
-    );
-    // returning the data to the front-end
-    res.json(response.data.data);
-  } catch (err) {
-    // error
-    res.status(500).send("Failed to fetch budget's accounts'");
+    // trying to get the user's budgets from ynab
+    try {
+      const response = await axios.get(
+        `https://api.ynab.com/v1/budgets/${budget_id}/accounts`,
+        {
+          headers: {
+            Authorization: `Bearer ${req.session.ynab_token}`,
+          },
+        }
+      );
+      // returning the data to the front-end
+      res.json(response.data.data);
+    } catch (err) {
+      // error
+      res.status(500).send("Failed to fetch budget's accounts'");
+    }
   }
-});
+);
 
 // for posting the transactions to YNAB
-app.post("/api/ynab/budgets/:budget_id/transactions", async (req, res) => {
-  if (!ynab_token) return res.status(401).send("Not authenticated");
+app.post(
+  "/api/ynab/budgets/:budget_id/transactions",
+  ensureYNABAuth,
+  async (req, res) => {
+    const { budget_id } = req.params;
+    const transactionsData = req.body;
 
-  const { budget_id } = req.params;
-  const transactionsData = req.body;
+    try {
+      const response = await axios.post(
+        `https://api.ynab.com/v1/budgets/${budget_id}/transactions`,
+        transactionsData,
+        {
+          headers: {
+            Authorization: `Bearer ${req.session.ynab_token}`,
+            "Content-Type": "application/json", // usually needed for POST JSON
+          },
+        }
+      );
 
-  try {
-    const response = await axios.post(
-      `https://api.ynab.com/v1/budgets/${budget_id}/transactions`,
-      transactionsData,
-      {
-        headers: {
-          Authorization: `Bearer ${ynab_token}`,
-          "Content-Type": "application/json", // usually needed for POST JSON
-        },
-      }
-    );
-
-    res.json(response.data);
-  } catch (err) {
-    console.log(err.response.data);
-    res.status(500).send("Failed to export transactions");
+      res.json(response.data);
+    } catch (err) {
+      console.log(err.response.data);
+      res.status(500).send("Failed to export transactions");
+    }
   }
-});
+);
 
 // ---SPLITWISE-RELATED-API---
 
 // for getting user's friends
-app.get("/api/splitwise/friends", async (req, res) => {
+app.get("/api/splitwise/friends", ensureSplitwiseAuth, async (req, res) => {
   // if splitwise is not yet authenticated
-  if (!splitwise_token) return res.status(401).send("Not authenticated");
+  if (!req.session.splitwise_token)
+    return res.status(401).send("Splitwise not authenticated");
 
   // trying to get the user's friends from splitwise
   try {
@@ -209,7 +277,7 @@ app.get("/api/splitwise/friends", async (req, res) => {
       "https://secure.splitwise.com/api/v3.0/get_friends",
       {
         headers: {
-          Authorization: `Bearer ${splitwise_token}`,
+          Authorization: `Bearer ${req.session.splitwise_token}`,
         },
       }
     );
@@ -222,9 +290,10 @@ app.get("/api/splitwise/friends", async (req, res) => {
 });
 
 // for getting user's groups
-app.get("/api/splitwise/groups", async (req, res) => {
+app.get("/api/splitwise/groups", ensureSplitwiseAuth, async (req, res) => {
   // if splitwise is not yet authenticated
-  if (!splitwise_token) return res.status(401).send("Not authenticated");
+  if (!req.session.splitwise_token)
+    return res.status(401).send("Not authenticated");
 
   // trying to get the user's groups from splitwise
   try {
@@ -232,7 +301,7 @@ app.get("/api/splitwise/groups", async (req, res) => {
       "https://secure.splitwise.com/api/v3.0/get_groups",
       {
         headers: {
-          Authorization: `Bearer ${splitwise_token}`,
+          Authorization: `Bearer ${req.session.splitwise_token}`,
         },
       }
     );
@@ -270,7 +339,7 @@ const idToName = (users, id) => {
 };
 
 // take only what matters from the expense
-const processExpense = (expense) => {
+const processExpense = (expense, current_user_id) => {
   // if expense deleted, dont use it
   if (expense.deleted_at !== null) {
     return null;
@@ -281,7 +350,7 @@ const processExpense = (expense) => {
   let cost = 0;
   expense.repayments.forEach((repayment) => {
     numericAmount = Number(repayment.amount);
-    if (repayment.from === splitwise_current_user.id) {
+    if (repayment.from === current_user_id) {
       // if user is the one who pays (he owes the money to someone)
       repayments.push({
         amount: numericAmount, // how much money to pay
@@ -289,7 +358,7 @@ const processExpense = (expense) => {
         lender: false, // we are in debt (we're not the lender)
       });
       cost -= numericAmount;
-    } else if (repayment.to === splitwise_current_user.id) {
+    } else if (repayment.to === current_user_id) {
       // if user is the one who gets paid (someone owes him the money)
       repayments.push({
         amount: numericAmount, // how much money the user pay us
@@ -314,10 +383,7 @@ const processExpense = (expense) => {
 };
 
 // for getting user's expenses
-app.get("/api/splitwise/expenses", async (req, res) => {
-  // if splitwise is not yet authenticated
-  if (!splitwise_token) return res.status(401).send("Not authenticated");
-
+app.get("/api/splitwise/expenses", ensureSplitwiseAuth, async (req, res) => {
   const queryParams = req.query;
 
   // trying to get the user's expenses from splitwise
@@ -326,7 +392,7 @@ app.get("/api/splitwise/expenses", async (req, res) => {
       "https://secure.splitwise.com/api/v3.0/get_expenses",
       {
         headers: {
-          Authorization: `Bearer ${splitwise_token}`,
+          Authorization: `Bearer ${req.session.splitwise_token}`,
         },
         params: queryParams,
       }
@@ -336,7 +402,9 @@ app.get("/api/splitwise/expenses", async (req, res) => {
     const expenses = response.data.expenses;
     // processing original expenses
     const processedExpenses = expenses
-      .map((expense) => processExpense(expense))
+      .map((expense) =>
+        processExpense(expense, req.session.splitwise_current_user.id)
+      )
       .filter((expense) => expense !== null);
 
     // returning the data to the front-end

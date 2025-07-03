@@ -6,7 +6,12 @@ import LoadingComponent from "./LoadingComponent";
 // a function to fetch splitwise friends
 const fetchFriends = async () => {
   const res = await fetch(
-    `${import.meta.env.VITE_API_BASE_URL}/api/splitwise/friends`
+    `${import.meta.env.VITE_API_BASE_URL}/api/splitwise/friends`,
+    {
+      headers: {
+        Authorization: `Session ${sessionStorage.getItem("sw_session_id")}`,
+      },
+    }
   );
   if (!res.ok) throw new Error("Failed to fetch entities");
   return res.json();
@@ -15,7 +20,12 @@ const fetchFriends = async () => {
 // a function to fetch splitwise groups
 const fetchGroups = async () => {
   const res = await fetch(
-    `${import.meta.env.VITE_API_BASE_URL}/api/splitwise/groups`
+    `${import.meta.env.VITE_API_BASE_URL}/api/splitwise/groups`,
+    {
+      headers: {
+        Authorization: `Session ${sessionStorage.getItem("sw_session_id")}`,
+      },
+    }
   );
   if (!res.ok) throw new Error("Failed to fetch entities");
   return res.json();
