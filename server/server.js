@@ -3,19 +3,11 @@ const express = require("express");
 const axios = require("axios");
 const dotenv = require("dotenv");
 const cors = require("cors");
-const jwt = require("jsonwebtoken");
 
 dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());
-
-// the token used for all api-requests with splitwise
-let splitwise_token = null;
-// the token used for all api-requests with ynab
-let ynab_token = null;
-// the current user information in splitwise
-let splitwise_current_user = null;
 
 // for storing sessions id (unique to each user of the app, one for each platform).
 // those id's gives us the mapping to corresponding sw/ynab tokens.
